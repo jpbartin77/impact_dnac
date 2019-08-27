@@ -1,0 +1,765 @@
+{
+	"info": {
+		"_postman_id": "ba9f3aad-4d05-4d2a-be90-a9a71e8e840c",
+		"name": "Impact - PoV - Ex. 2 - Configure BGP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "0. Prep",
+			"item": [
+				{
+					"name": "Get Auth Token (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "74e2bbf2-4d8a-4812-ae57-e05c65f9106d",
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"dnacToken\", data.Token);",
+									"",
+									"",
+									"var latestRequest = pm.info.requestName;",
+									"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+									"console.log (\"Sending request \" + latestRequest)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{dnacAdminPwd}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{dnacAdmin}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/dna/system/api/v1/auth/token",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"dna",
+								"system",
+								"api",
+								"v1",
+								"auth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Deploy Campus VN Manual Configuration",
+			"item": [
+				{
+					"name": "Create Project (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "645deb90-b35a-42ff-a003-cd7618815137",
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"taskId\", data.response.taskId);",
+									"",
+									"var latestRequest = pm.info.requestName;",
+									"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+									"console.log (\"Sending request \" + latestRequest);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"{{projectDescription}}\",\n    \"name\": \"{{projectName}}\",\n    \"tags\": []\n}"
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/dna/intent/api/v1/template-programmer/project",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"dna",
+								"intent",
+								"api",
+								"v1",
+								"template-programmer",
+								"project"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task Status (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "645deb90-b35a-42ff-a003-cd7618815137",
+								"exec": [
+									"var data = JSON.parse(responseBody);\r",
+									"var latestRequest = pm.variables.get(\"latestRequest\");\r",
+									"var service = data.response.serviceType;\r",
+									"var isError = data.response.isError.toString();\r",
+									"\r",
+									"\r",
+									"if (isError == \"false\") {\r",
+									"    console.log(\"........\" + latestRequest + \" submitted successfully.\");\r",
+									"}\r",
+									"else {\r",
+									"    console.log(\"........ \" + latestRequest + \" generated an ERROR !!!!!\");\r",
+									"    console.log(\"........ Service type is \" + service);\r",
+									"    console.log(\"........ Failure reason is \" + data.response.failureReason);\r",
+									"    \r",
+									"}\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/dna/intent/api/v1/task/{{taskId}}",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"dna",
+								"intent",
+								"api",
+								"v1",
+								"task",
+								"{{taskId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Projects (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "645deb90-b35a-42ff-a003-cd7618815137",
+								"exec": [
+									"console.log(\"Sleeping for 2 Seconds.  Gathering variables.\");",
+									"setTimeout(function(){}, 2000);",
+									"",
+									"var data = JSON.parse(responseBody);",
+									"var projectName = postman.getEnvironmentVariable(\"projectName\");",
+									"",
+									"",
+									"for (var i=0; i < data.length; i++) {",
+									"",
+									"    if (data[i].name == projectName) {",
+									"",
+									"        postman.setEnvironmentVariable(\"projectId\", data[i].id);",
+									"    }",
+									"}",
+									"",
+									"var latestRequest = pm.info.requestName;",
+									"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+									"console.log (\"Sending request \" + latestRequest);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/api/v1/template-programmer/project",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"template-programmer",
+								"project"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Campus BGP Template (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "645deb90-b35a-42ff-a003-cd7618815137",
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"taskId\", data.response.taskId);",
+									"",
+									"var latestRequest = pm.info.requestName;",
+									"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+									"console.log (\"Sending request \" + latestRequest);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{templateName}}\",\n    \"description\": \"{{templateDescription}}\",\n    \"tags\": [],\n    \"deviceTypes\": [\n        {\n            \"productFamily\": \"Switches and Hubs\"\n        }\n    ],\n    \"softwareType\": \"IOS-XE\",\n       \"templateContent\": \"int vlan $FUSION_VLAN\\nbfd interval 300 min_rx 300 multiplier 3\\nno bfd echo\\n\\nint vlan $IBGP_VLAN\\nvrf forward $VN_NAME\\nip address $IBGP_LOCAL_IP 255.255.255.252\\nbfd interval 300 min_rx 300 multiplier 3\\nno bfd echo\\n\\nrouter bgp $LOCAL_AS\\naddress-family ipv4 vrf $VN_NAME\\nneighbor $IBGP_NEIGHBOR_IP remote-as 65534\\nneighbor $IBGP_NEIGHBOR_IP fall-over bfd\\nneighbor $IBGP_NEIGHBOR_IP activate\\nneighbor $IBGP_NEIGHBOR_IP next-hop-self\\nneighbor $FUSION_IP fall-over bfd\\n\",\n    \"rollbackTemplateContent\": \"\",\n    \"templateParams\": [\n        {\n            \"parameterName\": \"IBGP_NEIGHBOR_IP\",\n            \"dataType\": \"STRING\",\n            \"required\": true,\n            \"notParam\": false,\n            \"paramArray\": false,\n            \"order\": 6\n        },\n        {\n            \"parameterName\": \"IBGP_VLAN\",\n            \"dataType\": \"STRING\",\n            \"required\": true,\n            \"notParam\": false,\n            \"paramArray\": false,\n\n            \"order\": 2\n        },\n        {\n            \"parameterName\": \"VN_NAME\",\n            \"dataType\": \"STRING\",\n            \"required\": true,\n            \"notParam\": false,\n            \"paramArray\": false,\n            \"order\": 3\n        },\n        {\n            \"parameterName\": \"LOCAL_AS\",\n            \"dataType\": \"STRING\",\n            \"notParam\": false,\n            \"paramArray\": false,\n            \"order\": 5\n        },\n        {\n            \"parameterName\": \"FUSION_IP\",\n            \"dataType\": \"STRING\",\n            \"required\": true,\n            \"notParam\": false,\n            \"paramArray\": false,\n            \"order\": 7\n        },\n        {\n            \"parameterName\": \"IBGP_LOCAL_IP\",\n            \"dataType\": \"STRING\",\n            \"required\": true,\n            \"notParam\": false,\n            \"paramArray\": false,\n            \"order\": 4\n        },\n        {\n            \"parameterName\": \"FUSION_VLAN\",\n            \"dataType\": \"STRING\",\n            \"required\": true,\n            \"notParam\": false,\n            \"paramArray\": false,\n            \"order\": 1\n        }\n    ],\n    \"composite\": false,\n    \"projectName\": \"{{projectName}}\",\n    \"projectId\": \"{{projectId}}\"\n}"
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/dna/intent/api/v1/template-programmer/project/{{projectId}}/template",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"dna",
+								"intent",
+								"api",
+								"v1",
+								"template-programmer",
+								"project",
+								"{{projectId}}",
+								"template"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task Status (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "645deb90-b35a-42ff-a003-cd7618815137",
+								"exec": [
+									"var data = JSON.parse(responseBody);\r",
+									"var latestRequest = pm.variables.get(\"latestRequest\");\r",
+									"var service = data.response.serviceType;\r",
+									"var isError = data.response.isError.toString();\r",
+									"\r",
+									"\r",
+									"if (isError == \"false\") {\r",
+									"    console.log(\"........\" + latestRequest + \" submitted successfully.\");\r",
+									"}\r",
+									"else {\r",
+									"    console.log(\"........ \" + latestRequest + \" generated an ERROR !!!!!\");\r",
+									"    console.log(\"........ Service type is \" + service);\r",
+									"    console.log(\"........ Failure reason is \" + data.response.failureReason);\r",
+									"    \r",
+									"}\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/dna/intent/api/v1/task/{{taskId}}",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"dna",
+								"intent",
+								"api",
+								"v1",
+								"task",
+								"{{taskId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Template Id (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e39dddf5-f35e-4f82-bd1b-2bd3ff0a341b",
+								"exec": [
+									"console.log(\"Sleeping for 2 Seconds.  Gathering variables.\");",
+									"setTimeout(function(){}, 2000);",
+									"",
+									"projectName = postman.getEnvironmentVariable(\"projectName\");",
+									"templateName = postman.getEnvironmentVariable(\"templateName\");",
+									"",
+									"var data = JSON.parse(responseBody);",
+									"",
+									"for (var i=0; i < data.length; i++) {",
+									"    if (data[i].name == projectName) {",
+									"        for (var n=0; n < data[i].templates.length; n++) {",
+									"            if(data[i].templates[n].name == templateName) {",
+									"                postman.setEnvironmentVariable(\"templateId\",data[i].templates[n].id);",
+									"            }",
+									"        }",
+									"    }",
+									"}",
+									"",
+									"var latestRequest = pm.info.requestName;",
+									"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+									"console.log (\"Sending request \" + latestRequest);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/dna/intent/api/v1/template-programmer/project",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"dna",
+								"intent",
+								"api",
+								"v1",
+								"template-programmer",
+								"project"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Commit Template (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "645deb90-b35a-42ff-a003-cd7618815137",
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"taskId\", data.response.taskId);",
+									"",
+									"var latestRequest = pm.info.requestName;",
+									"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+									"console.log (\"Sending request \" + latestRequest);",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"comments\": \"First Commit from API\",\n    \"templateId\": \"{{templateId}}\"\n}"
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/dna/intent/api/v1/template-programmer/template/version",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"dna",
+								"intent",
+								"api",
+								"v1",
+								"template-programmer",
+								"template",
+								"version"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task Status (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "645deb90-b35a-42ff-a003-cd7618815137",
+								"exec": [
+									"var data = JSON.parse(responseBody);\r",
+									"var latestRequest = pm.variables.get(\"latestRequest\");\r",
+									"var service = data.response.serviceType;\r",
+									"var isError = data.response.isError.toString();\r",
+									"\r",
+									"\r",
+									"if (isError == \"false\") {\r",
+									"    console.log(\"........\" + latestRequest + \" submitted successfully.\");\r",
+									"}\r",
+									"else {\r",
+									"    console.log(\"........ \" + latestRequest + \" generated an ERROR !!!!!\");\r",
+									"    console.log(\"........ Service type is \" + service);\r",
+									"    console.log(\"........ Failure reason is \" + data.response.failureReason);\r",
+									"    \r",
+									"}\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/dna/intent/api/v1/task/{{taskId}}",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"dna",
+								"intent",
+								"api",
+								"v1",
+								"task",
+								"{{taskId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Template Latest Version (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e319b3dc-37d0-4aa9-80c3-7640fd7fc967",
+								"exec": [
+									"console.log(\"Sleeping for 2 Seconds.  Gathering variables.\");",
+									"setTimeout(function(){}, 2000);",
+									"",
+									"var data = JSON.parse(responseBody);",
+									"var versionsInfo = data[0].versionsInfo;",
+									"var latestVersion = 0;",
+									"",
+									"for (var i=0; i < versionsInfo.length; i++) {",
+									"    if (versionsInfo[i].versionsTime !== 0) {",
+									"        if (versionsInfo[i].version > latestVersion) {",
+									"            latestVersion = versionsInfo[i].version;",
+									"            postman.setEnvironmentVariable(\"templateLatestVersion\", versionsInfo[i].version);",
+									"            postman.setEnvironmentVariable(\"templateLatestVersionId\", versionsInfo[i].id);",
+									"        }",
+									"    }",
+									"}",
+									"",
+									"var latestRequest = pm.info.requestName;",
+									"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+									"console.log (\"Sending request \" + latestRequest);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/api/v1/template-programmer/template/version/{{templateId}}",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"template-programmer",
+								"template",
+								"version",
+								"{{templateId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deploy Campus BGP Border 1 (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "645deb90-b35a-42ff-a003-cd7618815137",
+								"exec": [
+									"var latestRequest = pm.info.requestName;",
+									"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+									"console.log (\"Sending request \" + latestRequest);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"forcePushTemplate\": true,\n\n    \"targetInfo\": [\n        {\n            \"id\": \"{{mgmtIpBorder1}}\",\n            \"type\": \"MANAGED_DEVICE_IP\",\n            \"params\": {\n            \t\"VN_NAME\": \"{{vnName}}\",\n            \t\"LOCAL_AS\": \"{{bgpAsFabric}}\",\n            \t\"FUSION_VLAN\": \"{{vlanBorder1Campus}}\",\n            \t\"FUSION_IP\": \"{{ipFusionToBorder1}}\",\n            \t\"IBGP_VLAN\": \"{{vlanIbgp}}\",\n            \t\"IBGP_NEIGHBOR_IP\": \"{{ipIbgpBorder2}}\",\n            \t\"IBGP_LOCAL_IP\": \"{{ipIbgpBorder1}}\"\n            }\n        }\n    ],\n    \"templateId\": \"{{templateLatestVersionId}}\"\n}"
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/dna/intent/api/v1/template-programmer/template/deploy",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"dna",
+								"intent",
+								"api",
+								"v1",
+								"template-programmer",
+								"template",
+								"deploy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deploy Campus BGP Border 2 (P13)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "645deb90-b35a-42ff-a003-cd7618815137",
+								"exec": [
+									"var latestRequest = pm.info.requestName;",
+									"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+									"console.log (\"Sending request \" + latestRequest);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"type": "text",
+								"value": "{{dnacToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"forcePushTemplate\": true,\n\n    \"targetInfo\": [\n        {\n            \"id\": \"{{mgmtIpBorder2}}\",\n            \"type\": \"MANAGED_DEVICE_IP\",\n            \"params\": {\n            \t\"VN_NAME\": \"{{vnName}}\",\n            \t\"LOCAL_AS\": \"{{bgpAsFabric}}\",\n            \t\"FUSION_VLAN\": \"{{vlanBorder2Campus}}\",\n            \t\"FUSION_IP\": \"{{ipFusionToBorder2}}\",\n            \t\"IBGP_VLAN\": \"{{vlanIbgp}}\",\n            \t\"IBGP_NEIGHBOR_IP\": \"{{ipIbgpBorder1}}\",\n            \t\"IBGP_LOCAL_IP\": \"{{ipIbgpBorder2}}\"\n            }\n        }\n    ],\n    \"templateId\": \"{{templateLatestVersionId}}\"\n}"
+						},
+						"url": {
+							"raw": "https://{{dnacAddress}}/dna/intent/api/v1/template-programmer/template/deploy",
+							"protocol": "https",
+							"host": [
+								"{{dnacAddress}}"
+							],
+							"path": [
+								"dna",
+								"intent",
+								"api",
+								"v1",
+								"template-programmer",
+								"template",
+								"deploy"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

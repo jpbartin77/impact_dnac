@@ -1,0 +1,195 @@
+{
+	"info": {
+		"_postman_id": "80f0db4e-a9ca-4be4-9f58-6cb49d851072",
+		"name": "Impact - PoV - Ex. 1 - Site Hierachy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Auth Token (P13)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "74e2bbf2-4d8a-4812-ae57-e05c65f9106d",
+						"exec": [
+							"var data = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"dnacToken\", data.Token);",
+							"",
+							"",
+							"var latestRequest = pm.info.requestName;",
+							"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+							"console.log (\"Sending request \" + latestRequest)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{dnacAdminPwd}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{dnacAdmin}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{dnacAddress}}/dna/system/api/v1/auth/token",
+					"protocol": "https",
+					"host": [
+						"{{dnacAddress}}"
+					],
+					"path": [
+						"dna",
+						"system",
+						"api",
+						"v1",
+						"auth",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Site (P13)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "645deb90-b35a-42ff-a003-cd7618815137",
+						"exec": [
+							"var data = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"executionId\", data.executionId);",
+							"",
+							"var latestRequest = pm.info.requestName;",
+							"postman.setEnvironmentVariable(\"latestRequest\", latestRequest);",
+							"console.log (\"Sending request \" + latestRequest);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "x-auth-token",
+						"type": "text",
+						"value": "{{dnacToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"building\",\n    \"site\": {\n    \t\n        \"area\": {\n            \"name\": \"{{podXParent}}\",\n            \"parentName\": \"{{base}}\"\n        },\n        \"building\": {\n            \"name\": \"{{podXName}}\",\n            \"address\": \"{{podXAddress}}\"\n        }\n    }\n}"
+				},
+				"url": {
+					"raw": "https://{{dnacAddress}}/dna/intent/api/v1/site",
+					"protocol": "https",
+					"host": [
+						"{{dnacAddress}}"
+					],
+					"path": [
+						"dna",
+						"intent",
+						"api",
+						"v1",
+						"site"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Execution Status (P13)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "645deb90-b35a-42ff-a003-cd7618815137",
+						"exec": [
+							"var data = JSON.parse(responseBody);\r",
+							"var latestRequest = pm.variables.get(\"latestRequest\");\r",
+							"var execStatus = data.status;\r",
+							"\r",
+							"\r",
+							"if (execStatus == \"SUCCESS\") {\r",
+							"    console.log(\"........\" + latestRequest + \" submitted successfully.\");\r",
+							"}\r",
+							"else {\r",
+							"    console.log(\"........ \" + latestRequest + \" need to add more here...In Progress and Failure\");\r",
+							"    console.log(\"........ Service type is \" + service);\r",
+							"    console.log(\"........ Failure reason is \" + data.response.failureReason);\r",
+							"    \r",
+							"}\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "x-auth-token",
+						"type": "text",
+						"value": "{{dnacToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{dnacAddress}}/dna/platform/management/business-api/v1/execution-status/{{executionId}}",
+					"protocol": "https",
+					"host": [
+						"{{dnacAddress}}"
+					],
+					"path": [
+						"dna",
+						"platform",
+						"management",
+						"business-api",
+						"v1",
+						"execution-status",
+						"{{executionId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
