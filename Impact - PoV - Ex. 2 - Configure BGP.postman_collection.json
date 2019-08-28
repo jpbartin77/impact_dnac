@@ -113,7 +113,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"description\": \"{{projectDescription}}\",\n    \"name\": \"{{projectName}}\",\n    \"tags\": []\n}"
+							"raw": "{\n    \"name\": \"{{projectName}}\",\n    \"tags\": []\n}"
 						},
 						"url": {
 							"raw": "https://{{dnacAddress}}/dna/intent/api/v1/template-programmer/project",
